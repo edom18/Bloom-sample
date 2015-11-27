@@ -13,7 +13,7 @@
     function compileShader(gl, vsSource, fsSource) {
         var vs = createShader(gl, 'vertex-shader',   vsSource);
         var fs = createShader(gl, 'fragment-shader', fsSource);
-        return createProgram(vs, fs);
+        return createProgram(gl, vs, fs);
     }
 
     /**
