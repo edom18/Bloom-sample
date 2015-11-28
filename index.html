@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title></title>
+<link rel="stylesheet" href="style.css" />
+
+<!-- メインシーンシェーダ -->
 <script id="vs" type="x-shader/x-vertex-shader">
 attribute vec3 position;
 attribute vec4 color;
@@ -25,10 +28,65 @@ precision mediump float;
 
 uniform sampler2D texture;
 
+varying vec4 vColor;
 varying vec2 vTextureCoord;
 
 void main() {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 texel = texture2D(texture, vTextureCoord);
+    gl_FragColor = texel;
+}
+</script>
+
+<!-- 高輝度抜き出しシェーダ -->
+<script id="brightness-vs" type="x-shader/x-vertex-shader">
+attribute vec3 position;
+attribute vec2 textureCoord;
+
+varying vec2 vTextureCoord;
+
+void main() {
+    vTextureCoord = textureCoord;
+    gl_Position = vec4(position, 1.0);
+}
+</script>
+<script id="brightness-fs" type="x-shader/x-fragment-shader">
+precision mediump float;
+
+uniform sampler2D texture;
+uniform float minBright;
+
+varying vec2 vTextureCoord;
+
+void main() {
+    vec3 texel = max(vec3(0.0), (texture2D(texture, vTextureCoord) - minBright).rgb);
+    gl_FragColor = vec4(texel, 1.0);
+}
+</script>
+
+<!-- Bloomシェーダ -->
+<script id="bloom-vs" type="x-shader/x-vertex-shader">
+varying vec2 vTextureCoord;
+
+void main() {
+    gl_Position = vec4(1.0);
+}
+</script>
+<script id="bloom-fs" type="x-shader/x-fragment-shader">
+precision mediump float;
+
+uniform sampler2D texture;
+
+uniform float offsets[6];
+uniform float weights[6];
+
+varying vec2 vTextureCoord;
+
+void main() {
+    vec4 color;
+    for (int i = 0; i < 15; i++) {
+        color += texture2D(texture, vTextureCoord * offsets[i]) * weights[i];
+    }
+    gl_FragColor = vec4(color.rgb, 1.0);
 }
 </script>
 </head>
