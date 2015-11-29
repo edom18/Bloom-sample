@@ -113,12 +113,15 @@ void main() {
 <script id="result-fs" type="x-shader/x-fragment-shader">
 precision mediump float;
 
-uniform sampler2D texture;
+uniform sampler2D originalTexture;
+uniform sampler2D bloomTexture;
 
 varying vec2 vTextureCoord;
 
 void main() {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 texel = texture2D(originalTexture, vTextureCoord);
+    texel += texture2D(bloomTexture, vTextureCoord);
+    gl_FragColor = texel;
 }
 </script>
 </head>

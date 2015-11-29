@@ -49,6 +49,10 @@
             gl.enableVertexAttribArray(positionLocation2);
             gl.vertexAttribPointer(positionLocation2, 3, gl.FLOAT, false, 0, 0);
 
+            var positionLocation3 = gl.getAttribLocation(program2, 'position');
+            gl.enableVertexAttribArray(positionLocation3);
+            gl.vertexAttribPointer(positionLocation3, 3, gl.FLOAT, false, 0, 0);
+
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
 
@@ -93,6 +97,10 @@
             gl.enableVertexAttribArray(textureCoord2);
             gl.vertexAttribPointer(textureCoord2, 2, gl.FLOAT, false, 0, 0);
 
+            var textureCoord3 = gl.getAttribLocation(program2, 'textureCoord');
+            gl.enableVertexAttribArray(textureCoord3);
+            gl.vertexAttribPointer(textureCoord3, 2, gl.FLOAT, false, 0, 0);
+
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
 
@@ -111,6 +119,9 @@
         var textureLocation0 = gl.getUniformLocation(program0, 'texture');
         var textureLocation1 = gl.getUniformLocation(program1, 'texture');
         var textureLocation2 = gl.getUniformLocation(program2, 'texture');
+
+        var textureLocation3 = gl.getUniformLocation(program3, 'originalTexture');
+        var textureLocation4 = gl.getUniformLocation(program3, 'bloomTexture');
 
         var minBrightLocation = gl.getUniformLocation(program0, 'minBright');
 
@@ -141,14 +152,24 @@
         var texture;
         var rad = 10 * Math.PI / 180;
 
+        var originalScreen = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, originalScreen);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, window.innerWidth, window.innerHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
         var captureScreen = gl.createTexture();
-        gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, captureScreen);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, window.innerWidth, window.innerHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
 
         // Sampling
         var SAMPLE_COUNT = 25;
@@ -231,11 +252,10 @@
 
             // Pass
             {
-
                 // 現在のバッファの状態をコピー
                 // 1番のテクスチャにコピーする（上記でテクスチャ使い終わっているから要らない処理）
                 gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                gl.bindTexture(gl.TEXTURE_2D, originalScreen);
                 gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
 
                 gl.useProgram(program0);
@@ -274,6 +294,23 @@
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
+            // Pass
+            {
+                gl.useProgram(program3);
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                gl.clearDepth(1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, originalScreen);
+                gl.uniform1i(textureLocation3, 0);
+
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                gl.uniform1i(textureLocation4, 1);
+
+                gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
+            }
 
             gl.flush();
 
