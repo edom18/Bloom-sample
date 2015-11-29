@@ -17,10 +17,14 @@
     var vsSource2 = document.getElementById('bloom-vs').innerHTML;
     var fsSource2 = document.getElementById('bloom-fs').innerHTML;
 
+    var vsSource3 = document.getElementById('result-vs').innerHTML;
+    var fsSource3 = document.getElementById('result-fs').innerHTML;
+
     function main() {
         var program0 = compileShader(gl, vsSource0, fsSource0);
         var program1 = compileShader(gl, vsSource1, fsSource1);
         var program2 = compileShader(gl, vsSource2, fsSource2);
+        var program3 = compileShader(gl, vsSource3, fsSource3);
 
         // position
         {
@@ -31,16 +35,19 @@
                  1.0, -1.0, 0.0
             ];
             var positionVBO = createVBO(gl, positionData);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionVBO);
 
             var positionLocation0 = gl.getAttribLocation(program0, 'position');
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionVBO);
             gl.enableVertexAttribArray(positionLocation0);
             gl.vertexAttribPointer(positionLocation0, 3, gl.FLOAT, false, 0, 0);
 
             var positionLocation1 = gl.getAttribLocation(program1, 'position');
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionVBO);
             gl.enableVertexAttribArray(positionLocation1);
             gl.vertexAttribPointer(positionLocation1, 3, gl.FLOAT, false, 0, 0);
+
+            var positionLocation2 = gl.getAttribLocation(program2, 'position');
+            gl.enableVertexAttribArray(positionLocation2);
+            gl.vertexAttribPointer(positionLocation2, 3, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
@@ -72,15 +79,20 @@
                 1.0, 1.0
             ];
             var textureCoordVBO = createVBO(gl, textureCoordData);
+            gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordVBO);
 
             var textureCoord0 = gl.getAttribLocation(program0, 'textureCoord');
-            gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordVBO);
             gl.enableVertexAttribArray(textureCoord0);
             gl.vertexAttribPointer(textureCoord0, 2, gl.FLOAT, false, 0, 0);
 
             var textureCoord1 = gl.getAttribLocation(program1, 'textureCoord');
             gl.enableVertexAttribArray(textureCoord1);
             gl.vertexAttribPointer(textureCoord1, 2, gl.FLOAT, false, 0, 0);
+
+            var textureCoord2 = gl.getAttribLocation(program2, 'textureCoord');
+            gl.enableVertexAttribArray(textureCoord2);
+            gl.vertexAttribPointer(textureCoord2, 2, gl.FLOAT, false, 0, 0);
+
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
 
@@ -98,11 +110,14 @@
         var matrixLocation  = gl.getUniformLocation(program1, 'mvpMatrix');
         var textureLocation0 = gl.getUniformLocation(program0, 'texture');
         var textureLocation1 = gl.getUniformLocation(program1, 'texture');
+        var textureLocation2 = gl.getUniformLocation(program2, 'texture');
 
         var minBrightLocation = gl.getUniformLocation(program0, 'minBright');
 
-        var offsetsLocation = gl.getUniformLocation(program2, 'offsets');
-        var weightsLocation = gl.getUniformLocation(program2, 'weights');
+        var offsetsLocationH = gl.getUniformLocation(program2, 'offsetsH');
+        var weightsLocationH = gl.getUniformLocation(program2, 'weightsH');
+        var offsetsLocationV = gl.getUniformLocation(program2, 'offsetsV');
+        var weightsLocationV = gl.getUniformLocation(program2, 'weightsV');
 
         // Setup matricies
         {
@@ -136,21 +151,50 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
         // Sampling
-        var SAMPLE_COUNT = 4;
-        for (var j = 0; j < 2; j++) {
-            var offset = new Array(SAMPLE_COUNT);
-            var weight = new Array(SAMPLE_COUNT);
+        var SAMPLE_COUNT = 25;
+
+        var offsetH = new Array(SAMPLE_COUNT);
+        var weightH = new Array(SAMPLE_COUNT);
+        {
+            var offsetTmp = new Array(SAMPLE_COUNT);
             var total = 0;
 
             for (var i = 0; i < SAMPLE_COUNT; i++) {
-                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.01;
-                offset[i] = (j % 2 === 0) ? [p, 0, 0, 0] : [0, p, 0, 0];
-                weight[i] = Math.exp(-p * p / 2) / Math.sqrt(Math.PI * 2);
-                total += weight[i];
+                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.0006;
+                offsetTmp[i] = p;
+                weightH[i] = Math.exp(-p * p / 2) / Math.sqrt(Math.PI * 2);
+                total += weightH[i];
             }
             for (var i = 0; i < SAMPLE_COUNT; i++) {
-                weight[i] /= total;
+                weightH[i] /= total;
             }
+            var tmp = [];
+            for (var key in offsetTmp) {
+                tmp.push(offsetTmp[key], 0);
+            }
+            offsetH = new Float32Array(tmp);
+        }
+
+        var offsetV = new Array(SAMPLE_COUNT);
+        var weightV = new Array(SAMPLE_COUNT);
+        {
+            var offsetTmp = new Array(SAMPLE_COUNT);
+            var total = 0;
+
+            for (var i = 0; i < SAMPLE_COUNT; i++) {
+                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.0006;
+                offsetTmp[i] = p;
+                weightV[i] = Math.exp(-p * p / 2) / Math.sqrt(Math.PI * 2);
+                total += weightV[i];
+            }
+            for (var i = 0; i < SAMPLE_COUNT; i++) {
+                weightV[i] /= total;
+            }
+            var tmp = [];
+            for (var key in offsetTmp) {
+                tmp.push(0, offsetTmp[key]);
+            }
+            offsetV = new Float32Array(tmp);
         }
 
         function runLoop() {
@@ -202,8 +246,30 @@
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
                 gl.uniform1i(textureLocation0, 1);
-                gl.uniform1f(minBrightLocation, 0.5);
-                // gl.uniform1fv(arrayTestLocation, new Float32Array([0.5, 0.1, 0.3, 0.4, 1.0, 0.0]));
+                gl.uniform1f(minBrightLocation, 0.7);
+
+                gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
+            }
+
+            // Pass
+            {
+                gl.activeTexture(gl.TEXTURE2);
+                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
+
+                gl.useProgram(program2);
+
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                gl.clearDepth(1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                gl.uniform1i(textureLocation2, 2);
+
+                gl.uniform2fv(offsetsLocationH, offsetH);
+                gl.uniform1fv(weightsLocationH, weightH);
+
+                gl.uniform2fv(offsetsLocationV, offsetV);
+                gl.uniform1fv(weightsLocationV, weightV);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }

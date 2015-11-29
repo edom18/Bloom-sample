@@ -65,10 +65,14 @@ void main() {
 
 <!-- Bloomシェーダ -->
 <script id="bloom-vs" type="x-shader/x-vertex-shader">
+attribute vec3 position;
+attribute vec2 textureCoord;
+
 varying vec2 vTextureCoord;
 
 void main() {
-    gl_Position = vec4(1.0);
+    vTextureCoord = textureCoord;
+    gl_Position = vec4(position, 1.0);
 }
 </script>
 <script id="bloom-fs" type="x-shader/x-fragment-shader">
@@ -76,17 +80,45 @@ precision mediump float;
 
 uniform sampler2D texture;
 
-uniform float offsets[6];
-uniform float weights[6];
+#define SAMPLE_COUNT 25
+uniform vec2 offsetsH[SAMPLE_COUNT];
+uniform float weightsH[SAMPLE_COUNT];
+uniform vec2 offsetsV[SAMPLE_COUNT];
+uniform float weightsV[SAMPLE_COUNT];
 
 varying vec2 vTextureCoord;
 
 void main() {
-    vec4 color;
-    for (int i = 0; i < 15; i++) {
-        color += texture2D(texture, vTextureCoord * offsets[i]) * weights[i];
+    vec4 color = vec4(0.0);
+    for (int i = 0; i < SAMPLE_COUNT; i++) {
+        color += texture2D(texture, vTextureCoord + offsetsH[i]) * weightsH[i];
+        color += texture2D(texture, vTextureCoord + offsetsV[i]) * weightsV[i];
     }
     gl_FragColor = vec4(color.rgb, 1.0);
+}
+</script>
+
+<!-- 結果画面シェーダ -->
+<script id="result-vs" type="x-shader/x-fragment-shader">
+attribute vec3 position;
+attribute vec2 textureCoord;
+
+varying vec2 vTextureCoord;
+
+void main() {
+    vTextureCoord = textureCoord;
+    gl_Position = vec4(position, 1.0);
+}
+</script>
+<script id="result-fs" type="x-shader/x-fragment-shader">
+precision mediump float;
+
+uniform sampler2D texture;
+
+varying vec2 vTextureCoord;
+
+void main() {
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 </script>
 </head>
