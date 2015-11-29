@@ -74,7 +74,7 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
 
-        // texture
+        // textureCoord
         {
             var textureCoordData = [
                 0.0, 0.0, 
@@ -97,9 +97,27 @@
             gl.enableVertexAttribArray(textureCoord2);
             gl.vertexAttribPointer(textureCoord2, 2, gl.FLOAT, false, 0, 0);
 
-            var textureCoord3 = gl.getAttribLocation(program2, 'textureCoord');
-            gl.enableVertexAttribArray(textureCoord3);
-            gl.vertexAttribPointer(textureCoord3, 2, gl.FLOAT, false, 0, 0);
+            // var textureCoord3 = gl.getAttribLocation(program2, 'textureCoord');
+            // gl.enableVertexAttribArray(textureCoord3);
+            // gl.vertexAttribPointer(textureCoord3, 2, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        }
+
+        // textureCoord2
+        {
+            var textureCoordData2 = [
+                0.0, 1.0, 
+                1.0, 1.0, 
+                0.0, 0.0, 
+                1.0, 0.0
+            ];
+            var textureCoordVBO2 = createVBO(gl, textureCoordData2);
+            gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordVBO2);
+
+            var textureCoord2_2 = gl.getAttribLocation(program3, 'textureCoord');
+            gl.enableVertexAttribArray(textureCoord2_2);
+            gl.vertexAttribPointer(textureCoord2_2, 2, gl.FLOAT, false, 0, 0);
 
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
@@ -252,6 +270,8 @@
 
             // Pass
             {
+                // 輝度を集めるシェーダ
+
                 // 現在のバッファの状態をコピー
                 // 1番のテクスチャにコピーする（上記でテクスチャ使い終わっているから要らない処理）
                 gl.activeTexture(gl.TEXTURE1);
@@ -273,6 +293,8 @@
 
             // Pass
             {
+                // Bloomを生成するシェーダ
+                
                 gl.activeTexture(gl.TEXTURE2);
                 gl.bindTexture(gl.TEXTURE_2D, captureScreen);
                 gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
@@ -296,6 +318,12 @@
 
             // Pass
             {
+                // 最終結果シーン
+
+                gl.activeTexture(gl.TEXTURE3);
+                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
+
                 gl.useProgram(program3);
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 gl.clearDepth(1.0);
