@@ -119,7 +119,8 @@ uniform sampler2D bloomTexture;
 varying vec2 vTextureCoord;
 
 void main() {
-    vec4 texel = texture2D(originalTexture, vTextureCoord);
+    vec4 texel = vec4(0.0);
+    texel  = texture2D(originalTexture, vTextureCoord);
     texel += texture2D(bloomTexture, vTextureCoord);
     gl_FragColor = texel;
 }
