@@ -238,7 +238,20 @@
             offsetV = new Float32Array(tmp);
         }
 
+        var stats = new Stats();
+        stats.setMode(0);
+
+        // align top-left
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '0px';
+        stats.domElement.style.top = '0px';
+
+        document.body.appendChild(stats.domElement);
+
         function runLoop() {
+
+            stats.begin();
+
             // Pass
             {
                 // メインシーンをレンダリング
@@ -344,6 +357,8 @@
             }
 
             gl.flush();
+
+            stats.end();
 
             requestAnimationFrame(runLoop);
         }
