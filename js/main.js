@@ -97,10 +97,6 @@
             gl.enableVertexAttribArray(textureCoord2);
             gl.vertexAttribPointer(textureCoord2, 2, gl.FLOAT, false, 0, 0);
 
-            // var textureCoord3 = gl.getAttribLocation(program2, 'textureCoord');
-            // gl.enableVertexAttribArray(textureCoord3);
-            // gl.vertexAttribPointer(textureCoord3, 2, gl.FLOAT, false, 0, 0);
-
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
         }
 
@@ -166,9 +162,6 @@
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
 
-
-        // var offscreen = createFramebuffer(gl, window.innerWidth, window.innerHeight);
-
         var texture;
         var rad = 30 * Math.PI / 180;
 
@@ -181,17 +174,16 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.bindTexture(gl.TEXTURE_2D, null);
 
-        var captureScreen = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, captureScreen);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, window.innerWidth, window.innerHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.bindTexture(gl.TEXTURE_2D, null);
+        var width  = window.innerWidth;
+        var height = window.innerHeight;
 
-        var collectBrightBuffer = createFramebuffer(gl, window.innerWidth, window.innerHeight);
-        var bloomBuffer = createFramebuffer(gl, window.innerWidth, window.innerHeight);
+        var textureWidth  = width / 2;
+        var textureHeight = height / 2;
+
+        var mainBuffer = createFramebuffer(gl, width, height);
+
+        var collectBrightBuffer = createFramebuffer(gl, textureWidth, textureHeight);
+        var bloomBuffer = createFramebuffer(gl, textureWidth, textureHeight);
 
         // Sampling
         var SAMPLE_COUNT = 15;
@@ -242,13 +234,11 @@
 
         var stats = new Stats();
         stats.setMode(0);
-
-        // align top-left
         stats.domElement.style.position = 'absolute';
         stats.domElement.style.left = '0px';
         stats.domElement.style.top = '0px';
-
         document.body.appendChild(stats.domElement);
+
 
         function runLoop() {
 
@@ -260,6 +250,7 @@
 
                 // メインシーン用プログラムを使用
                 gl.useProgram(program1);
+                gl.viewport(0, 0, width, height);
 
                 // デバイス用のバッファにレンダリングするためframebufferをnullに
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -290,20 +281,23 @@
                 // 輝度を集めるシェーダ
 
                 // 現在のバッファの状態をコピー
-                // 1番のテクスチャにコピーする（上記でテクスチャ使い終わっているから要らない処理）
-                gl.activeTexture(gl.TEXTURE1);
+                gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, originalScreen);
                 gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
 
                 gl.useProgram(program0);
+                gl.viewport(0, 0, textureWidth, textureHeight);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, collectBrightBuffer.framebuffer);
 
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 gl.clearDepth(1.0);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, originalScreen);
+
                 gl.uniform1i(textureLocation0, 1);
-                gl.uniform1f(minBrightLocation, 0.3);
+                gl.uniform1f(minBrightLocation, 0.5);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
@@ -311,12 +305,9 @@
             // Pass
             {
                 // Bloomを生成するシェーダ
-                
-                // gl.activeTexture(gl.TEXTURE2);
-                // gl.bindTexture(gl.TEXTURE_2D, captureScreen);
-                // gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
 
                 gl.useProgram(program2);
+                gl.viewport(0, 0, textureWidth, textureHeight);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, bloomBuffer.framebuffer);
 
                 gl.activeTexture(gl.TEXTURE0);
@@ -341,11 +332,8 @@
             {
                 // 最終結果シーン
 
-                // gl.activeTexture(gl.TEXTURE3);
-                // gl.bindTexture(gl.TEXTURE_2D, captureScreen);
-                // gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
-
                 gl.useProgram(program3);
+                gl.viewport(0, 0, width, height);
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -355,7 +343,7 @@
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, originalScreen);
                 gl.uniform1i(textureLocation3, 0);
-                gl.uniform1f(toneScaleLocation, 0.2);
+                gl.uniform1f(toneScaleLocation, 0.7);
 
                 gl.activeTexture(gl.TEXTURE1);
                 gl.bindTexture(gl.TEXTURE_2D, bloomBuffer.texture);
