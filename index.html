@@ -123,6 +123,7 @@ void main() {
     vec4 texel = vec4(0.0);
     texel  = texture2D(originalTexture, vTextureCoord) * toneScale;
     texel += texture2D(bloomTexture, vTextureCoord);
+    // texel = texture2D(bloomTexture, vTextureCoord);
     gl_FragColor = texel;
 }
 </script>

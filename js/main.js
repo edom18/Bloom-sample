@@ -177,8 +177,8 @@
         var width  = window.innerWidth;
         var height = window.innerHeight;
 
-        var textureWidth  = width / 2;
-        var textureHeight = height / 2;
+        var textureWidth  = width / 5;
+        var textureHeight = height / 5;
 
         var mainBuffer = createFramebuffer(gl, width, height);
 
@@ -195,7 +195,7 @@
             var total = 0;
 
             for (var i = 0; i < SAMPLE_COUNT; i++) {
-                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.0006;
+                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.0018;
                 offsetTmp[i] = p;
                 weightH[i] = Math.exp(-p * p / 2) / Math.sqrt(Math.PI * 2);
                 total += weightH[i];
@@ -217,7 +217,7 @@
             var total = 0;
 
             for (var i = 0; i < SAMPLE_COUNT; i++) {
-                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.0006;
+                var p = (i - (SAMPLE_COUNT - 1) * 0.5) * 0.0018;
                 offsetTmp[i] = p;
                 weightV[i] = Math.exp(-p * p / 2) / Math.sqrt(Math.PI * 2);
                 total += weightV[i];
