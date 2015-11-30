@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="style.css" />
 
 <!-- メインシーンシェーダ -->
-<script id="vs" type="x-shader/x-vertex-shader">
+<script id="main-vs" type="x-shader/x-vertex-shader">
 attribute vec3 position;
 attribute vec4 color;
 attribute vec2 textureCoord;
@@ -23,7 +23,7 @@ void main() {
 }
 </script>
 
-<script id="fs" type="x-shader/x-fragment-shader">
+<script id="main-fs" type="x-shader/x-fragment-shader">
 precision mediump float;
 
 uniform sampler2D texture;

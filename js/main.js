@@ -11,8 +11,8 @@
     var vsSource0 = document.getElementById('brightness-vs').innerHTML;
     var fsSource0 = document.getElementById('brightness-fs').innerHTML;
 
-    var vsSource1 = document.getElementById('vs').innerHTML;
-    var fsSource1 = document.getElementById('fs').innerHTML;
+    var vsSource1 = document.getElementById('main-vs').innerHTML;
+    var fsSource1 = document.getElementById('main-fs').innerHTML;
 
     var vsSource2 = document.getElementById('bloom-vs').innerHTML;
     var fsSource2 = document.getElementById('bloom-fs').innerHTML;
