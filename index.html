@@ -80,7 +80,7 @@ precision mediump float;
 
 uniform sampler2D texture;
 
-#define SAMPLE_COUNT 25
+#define SAMPLE_COUNT 15
 uniform vec2 offsetsH[SAMPLE_COUNT];
 uniform float weightsH[SAMPLE_COUNT];
 uniform vec2 offsetsV[SAMPLE_COUNT];
@@ -115,12 +115,13 @@ precision mediump float;
 
 uniform sampler2D originalTexture;
 uniform sampler2D bloomTexture;
+uniform float toneScale;
 
 varying vec2 vTextureCoord;
 
 void main() {
     vec4 texel = vec4(0.0);
-    texel  = texture2D(originalTexture, vTextureCoord);
+    texel  = texture2D(originalTexture, vTextureCoord) * toneScale;
     texel += texture2D(bloomTexture, vTextureCoord);
     gl_FragColor = texel;
 }

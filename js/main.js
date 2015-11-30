@@ -148,6 +148,8 @@
         var offsetsLocationV = gl.getUniformLocation(program2, 'offsetsV');
         var weightsLocationV = gl.getUniformLocation(program2, 'weightsV');
 
+        var toneScaleLocation = gl.getUniformLocation(program3, 'toneScale');
+
         // Setup matricies
         {
             var mMatrix = mat4();
@@ -156,7 +158,7 @@
             var tmpMatrix = mat4();
             var mvpMatrix = mat4();
 
-            vMatrix = mat4.lookAt(vec3( 0.0, 0.0, 5.0 ), vec3(0, 0, 0), vec3(0, 1, 0));
+            vMatrix = mat4.lookAt(vec3(0.0, 2.0, 5.0 ), vec3(0, 0, 0), vec3(0, 1, 0));
             pMatrix = mat4.perspective(60, canvas.width / canvas.height, 0.1, 100);
             tmpMatrix = mat4.multiply(pMatrix, vMatrix);
         }
@@ -168,7 +170,7 @@
         // var offscreen = createFramebuffer(gl, window.innerWidth, window.innerHeight);
 
         var texture;
-        var rad = 10 * Math.PI / 180;
+        var rad = 30 * Math.PI / 180;
 
         var originalScreen = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, originalScreen);
@@ -190,7 +192,7 @@
 
 
         // Sampling
-        var SAMPLE_COUNT = 25;
+        var SAMPLE_COUNT = 15;
 
         var offsetH = new Array(SAMPLE_COUNT);
         var weightH = new Array(SAMPLE_COUNT);
@@ -253,13 +255,13 @@
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
                 // モデルの状態をアップデート
-                // mat4.rotate(mMatrix, rad, vec3(0, 1, 0), mMatrix);
+                mat4.rotate(mMatrix, rad, vec3(0, 1, 0), mMatrix);
                 mat4.multiply(tmpMatrix, mMatrix, mvpMatrix);
 
                 // uniform変数にデータをアップロード
-                gl.uniformMatrix4fv(matrixLocation, false, mvpMatrix);;
+                gl.uniformMatrix4fv(matrixLocation, false, mvpMatrix);
 
-                // 0番のテクスチャをアクティブに
+                // 0番のテクスチャを使用
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.uniform1i(textureLocation1, 0);
@@ -286,7 +288,7 @@
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
                 gl.uniform1i(textureLocation0, 1);
-                gl.uniform1f(minBrightLocation, 0.7);
+                gl.uniform1f(minBrightLocation, 0.3);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
@@ -332,6 +334,7 @@
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, originalScreen);
                 gl.uniform1i(textureLocation3, 0);
+                gl.uniform1f(toneScaleLocation, 0.2);
 
                 gl.activeTexture(gl.TEXTURE1);
                 gl.bindTexture(gl.TEXTURE_2D, captureScreen);
