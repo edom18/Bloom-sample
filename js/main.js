@@ -190,6 +190,8 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.bindTexture(gl.TEXTURE_2D, null);
 
+        var collectBrightBuffer = createFramebuffer(gl, window.innerWidth, window.innerHeight);
+        var bloomBuffer = createFramebuffer(gl, window.innerWidth, window.innerHeight);
 
         // Sampling
         var SAMPLE_COUNT = 15;
@@ -263,7 +265,7 @@
                 gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
                 // クリアを実行
-                gl.clearColor(0.3, 0.0, 0.0, 1.0);
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 gl.clearDepth(1.0);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -294,7 +296,7 @@
                 gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
 
                 gl.useProgram(program0);
-                // gl.bindFramebuffer(gl.FRAMEBUFFER, offscreen.framebuffer);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, collectBrightBuffer.framebuffer);
 
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 gl.clearDepth(1.0);
@@ -310,17 +312,21 @@
             {
                 // Bloomを生成するシェーダ
                 
-                gl.activeTexture(gl.TEXTURE2);
-                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
-                gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
+                // gl.activeTexture(gl.TEXTURE2);
+                // gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                // gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
 
                 gl.useProgram(program2);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, bloomBuffer.framebuffer);
+
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, collectBrightBuffer.texture);
 
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 gl.clearDepth(1.0);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                gl.uniform1i(textureLocation2, 2);
+                gl.uniform1i(textureLocation2, 0);
 
                 gl.uniform2fv(offsetsLocationH, offsetH);
                 gl.uniform1fv(weightsLocationH, weightH);
@@ -335,11 +341,13 @@
             {
                 // 最終結果シーン
 
-                gl.activeTexture(gl.TEXTURE3);
-                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
-                gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
+                // gl.activeTexture(gl.TEXTURE3);
+                // gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                // gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, window.innerWidth, window.innerHeight, 0);
 
                 gl.useProgram(program3);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
                 gl.clearDepth(1.0);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -350,7 +358,7 @@
                 gl.uniform1f(toneScaleLocation, 0.2);
 
                 gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, captureScreen);
+                gl.bindTexture(gl.TEXTURE_2D, bloomBuffer.texture);
                 gl.uniform1i(textureLocation4, 1);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
