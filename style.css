@@ -2,3 +2,11 @@ body, div {
     margin: 0;
     padding: 0;
 }
+
+#ctrl {
+    position: absolute;
+    width: 300px;
+    left: 50%;
+    bottom: 15px;
+    margin-left: -150px;
+}

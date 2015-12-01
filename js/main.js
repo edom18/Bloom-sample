@@ -241,6 +241,11 @@
         stats.domElement.style.top = '0px';
         document.body.appendChild(stats.domElement);
 
+        var minBrightValue = 0.5;
+        var brightSlider = document.getElementById('brightSlider');
+        brightSlider.addEventListener('input', function () {
+            minBrightValue = this.value;
+        }, false);
 
         function runLoop() {
 
@@ -299,7 +304,7 @@
                 gl.bindTexture(gl.TEXTURE_2D, originalScreen);
 
                 gl.uniform1i(textureLocation0, 1);
-                gl.uniform1f(minBrightLocation, 0.3);
+                gl.uniform1f(minBrightLocation, minBrightValue);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
