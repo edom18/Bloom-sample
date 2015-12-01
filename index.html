@@ -86,13 +86,21 @@ uniform float weightsH[SAMPLE_COUNT];
 uniform vec2 offsetsV[SAMPLE_COUNT];
 uniform float weightsV[SAMPLE_COUNT];
 
+uniform bool isVertical;
+
 varying vec2 vTextureCoord;
 
 void main() {
     vec4 color = vec4(0.0);
-    for (int i = 0; i < SAMPLE_COUNT; i++) {
-        color += texture2D(texture, vTextureCoord + offsetsH[i]) * weightsH[i];
-        color += texture2D(texture, vTextureCoord + offsetsV[i]) * weightsV[i];
+    if (isVertical) {
+        for (int i = 0; i < SAMPLE_COUNT; i++) {
+            color += texture2D(texture, vTextureCoord + offsetsV[i]) * weightsV[i];
+        }
+    }
+    else {
+        for (int i = 0; i < SAMPLE_COUNT; i++) {
+            color += texture2D(texture, vTextureCoord + offsetsH[i]) * weightsH[i];
+        }
     }
     gl_FragColor = vec4(color.rgb, 1.0);
 }
@@ -123,7 +131,6 @@ void main() {
     vec4 texel = vec4(0.0);
     texel  = texture2D(originalTexture, vTextureCoord) * toneScale;
     texel += texture2D(bloomTexture, vTextureCoord);
-    // texel = texture2D(bloomTexture, vTextureCoord);
     gl_FragColor = texel;
 }
 </script>

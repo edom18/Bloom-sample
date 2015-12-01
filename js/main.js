@@ -143,6 +143,7 @@
         var weightsLocationH = gl.getUniformLocation(program2, 'weightsH');
         var offsetsLocationV = gl.getUniformLocation(program2, 'offsetsV');
         var weightsLocationV = gl.getUniformLocation(program2, 'weightsV');
+        var isVerticalLocation = gl.getUniformLocation(program2, 'isVertical');
 
         var toneScaleLocation = gl.getUniformLocation(program3, 'toneScale');
 
@@ -177,8 +178,9 @@
         var width  = window.innerWidth;
         var height = window.innerHeight;
 
-        var textureWidth  = width / 5;
-        var textureHeight = height / 5;
+        var factor = 3;
+        var textureWidth  = width / factor;
+        var textureHeight = height / factor;
 
         var mainBuffer = createFramebuffer(gl, width, height);
 
@@ -297,14 +299,14 @@
                 gl.bindTexture(gl.TEXTURE_2D, originalScreen);
 
                 gl.uniform1i(textureLocation0, 1);
-                gl.uniform1f(minBrightLocation, 0.5);
+                gl.uniform1f(minBrightLocation, 0.3);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
             // Pass
             {
-                // Bloomを生成するシェーダ
+                // Bloom1を生成するシェーダ
 
                 gl.useProgram(program2);
                 gl.viewport(0, 0, textureWidth, textureHeight);
@@ -318,15 +320,38 @@
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
                 gl.uniform1i(textureLocation2, 0);
-
-                gl.uniform2fv(offsetsLocationH, offsetH);
-                gl.uniform1fv(weightsLocationH, weightH);
+                gl.uniform1i(isVerticalLocation, true);
 
                 gl.uniform2fv(offsetsLocationV, offsetV);
                 gl.uniform1fv(weightsLocationV, weightV);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
+
+            // Pass
+            {
+                // Bloom2を生成するシェーダ
+
+                gl.useProgram(program2);
+                gl.viewport(0, 0, textureWidth, textureHeight);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, collectBrightBuffer.framebuffer);
+
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, bloomBuffer.texture);
+
+                gl.clearColor(0.0, 0.0, 0.0, 1.0);
+                gl.clearDepth(1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                gl.uniform1i(textureLocation2, 0);
+                gl.uniform1i(isVerticalLocation, false);
+
+                gl.uniform2fv(offsetsLocationH, offsetH);
+                gl.uniform1fv(weightsLocationH, weightH);
+
+                gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
+            }
+
 
             // Pass
             {
@@ -346,7 +371,7 @@
                 gl.uniform1f(toneScaleLocation, 0.7);
 
                 gl.activeTexture(gl.TEXTURE1);
-                gl.bindTexture(gl.TEXTURE_2D, bloomBuffer.texture);
+                gl.bindTexture(gl.TEXTURE_2D, collectBrightBuffer.texture);
                 gl.uniform1i(textureLocation4, 1);
 
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
