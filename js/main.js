@@ -26,6 +26,14 @@
         var program2 = compileShader(gl, vsSource2, fsSource2);
         var program3 = compileShader(gl, vsSource3, fsSource3);
 
+        var ext = gl.getExtension('OES_vertex_array_object');
+        if (ext === null) {
+            alert('vertex array objct not supported.');
+            return;
+        }
+
+        var vao = ext.createVertexArrayOES();
+        ext.bindVertexArrayOES(vao);
 
         // VBO1
         {
@@ -127,6 +135,9 @@
             var indexIBO = createIBO(gl, indexData);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexIBO);
         }
+
+        ext.bindVertexArrayOES(null);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         // Uniform
         var matrixLocation  = gl.getUniformLocation(program1, 'mvpMatrix');
@@ -280,6 +291,7 @@
                 gl.uniform1i(textureLocation1, 0);
 
                 // メインシーンをdraw
+                ext.bindVertexArrayOES(vao);
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
@@ -306,6 +318,7 @@
                 gl.uniform1i(textureLocation0, 1);
                 gl.uniform1f(minBrightLocation, minBrightValue);
 
+                ext.bindVertexArrayOES(vao);
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
@@ -330,6 +343,7 @@
                 gl.uniform2fv(offsetsLocationV, offsetV);
                 gl.uniform1fv(weightsLocationV, weightV);
 
+                ext.bindVertexArrayOES(vao);
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
@@ -354,6 +368,7 @@
                 gl.uniform2fv(offsetsLocationH, offsetH);
                 gl.uniform1fv(weightsLocationH, weightH);
 
+                ext.bindVertexArrayOES(vao);
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
@@ -379,6 +394,7 @@
                 gl.bindTexture(gl.TEXTURE_2D, collectBrightBuffer.texture);
                 gl.uniform1i(textureLocation4, 1);
 
+                ext.bindVertexArrayOES(vao);
                 gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_SHORT, 0);
             }
 
