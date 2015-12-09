@@ -26,78 +26,78 @@
         var program2 = compileShader(gl, vsSource2, fsSource2);
         var program3 = compileShader(gl, vsSource3, fsSource3);
 
-        // position
+
+        // VBO1
         {
-            var positionData = [
-                -1.0,  1.0, 0.0,
-                 1.0,  1.0, 0.0,
-                -1.0, -1.0, 0.0, 
-                 1.0, -1.0, 0.0
+            var vertecies = [
+               -1.0,  1.0, 0.0,    // position
+                0.0,  0.0,         // uv
+
+                1.0,  1.0, 0.0,    // position
+                1.0,  0.0,         // uv
+
+               -1.0, -1.0, 0.0,    // position
+                0.0,  1.0,         // uv
+
+                1.0, -1.0, 0.0,    // position
+                1.0,  1.0,         // uv
             ];
-            var positionVBO = createVBO(gl, positionData);
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionVBO);
+            var vbo1 = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertecies), gl.STATIC_DRAW);
 
-            var positionLocation0 = gl.getAttribLocation(program0, 'position');
-            gl.enableVertexAttribArray(positionLocation0);
-            gl.vertexAttribPointer(positionLocation0, 3, gl.FLOAT, false, 0, 0);
+            var programs = [program0, program2];
+            for (var i = 0; i < programs.length; i++) {
+                var pLoc = gl.getAttribLocation(programs[i], 'position');
+                var tLoc = gl.getAttribLocation(programs[i], 'textureCoord');
 
-            var positionLocation1 = gl.getAttribLocation(program1, 'position');
-            gl.enableVertexAttribArray(positionLocation1);
-            gl.vertexAttribPointer(positionLocation1, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(pLoc);
+                gl.enableVertexAttribArray(tLoc);
 
-            var positionLocation2 = gl.getAttribLocation(program2, 'position');
-            gl.enableVertexAttribArray(positionLocation2);
-            gl.vertexAttribPointer(positionLocation2, 3, gl.FLOAT, false, 0, 0);
-
-            var positionLocation3 = gl.getAttribLocation(program2, 'position');
-            gl.enableVertexAttribArray(positionLocation3);
-            gl.vertexAttribPointer(positionLocation3, 3, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+                var byteLength = 4;
+                var byteStride = byteLength * (3 + 2);
+                gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, byteStride, 0);
+                gl.vertexAttribPointer(tLoc, 2, gl.FLOAT, false, byteStride, 3 * byteLength);
+            }
         }
 
-        // color
+        // VBO2
         {
-            var colorData = [
-                1.0, 0.0, 0.0, 1.0,
-                0.0, 1.0, 0.0, 1.0,
-                0.0, 0.0, 1.0, 1.0,
-                0.5, 0.5, 0.5, 1.0
+            var vertecies = [
+               -1.0,  1.0, 0.0,      // position
+                1.0,  0.0, 0.0, 1.0, // color
+                0.0,  0.0,           // uv
+
+                1.0,  1.0, 0.0,      // position
+                0.0,  1.0, 0.0, 1.0, // color
+                1.0,  0.0,           // uv
+
+               -1.0, -1.0, 0.0,      // position
+                0.0,  0.0, 1.0, 1.0, // color
+                0.0,  1.0,           // uv
+
+                1.0, -1.0, 0.0,      // position
+                0.5,  0.5, 0.5, 1.0, // color
+                1.0,  1.0,           // uv
             ];
-            var colorVBO = createVBO(gl, colorData);
-            gl.bindBuffer(gl.ARRAY_BUFFER, colorVBO);
 
-            var colorLocation1 = gl.getAttribLocation(program1, 'color');
-            gl.bindBuffer(gl.ARRAY_BUFFER, colorVBO);
-            gl.enableVertexAttribArray(colorLocation1);
-            gl.vertexAttribPointer(colorLocation1, 4, gl.FLOAT, false, 0, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        }
+            var vbo2 = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertecies), gl.STATIC_DRAW);
 
-        // textureCoord
-        {
-            var textureCoordData = [
-                0.0, 0.0, 
-                1.0, 0.0, 
-                0.0, 1.0, 
-                1.0, 1.0
-            ];
-            var textureCoordVBO = createVBO(gl, textureCoordData);
-            gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordVBO);
+            var pLoc = gl.getAttribLocation(program1, 'position');
+            var cLoc = gl.getAttribLocation(program1, 'color');
+            var tLoc = gl.getAttribLocation(program1, 'textureCoord');
 
-            var textureCoord0 = gl.getAttribLocation(program0, 'textureCoord');
-            gl.enableVertexAttribArray(textureCoord0);
-            gl.vertexAttribPointer(textureCoord0, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(pLoc);
+            gl.enableVertexAttribArray(cLoc);
+            gl.enableVertexAttribArray(tLoc);
 
-            var textureCoord1 = gl.getAttribLocation(program1, 'textureCoord');
-            gl.enableVertexAttribArray(textureCoord1);
-            gl.vertexAttribPointer(textureCoord1, 2, gl.FLOAT, false, 0, 0);
-
-            var textureCoord2 = gl.getAttribLocation(program2, 'textureCoord');
-            gl.enableVertexAttribArray(textureCoord2);
-            gl.vertexAttribPointer(textureCoord2, 2, gl.FLOAT, false, 0, 0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            var byteLength = 4;
+            var byteStride = byteLength * (3 + 4 + 2);
+            gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, byteStride, 0);
+            gl.vertexAttribPointer(cLoc, 3, gl.FLOAT, false, byteStride, 3 * byteLength);
+            gl.vertexAttribPointer(tLoc, 2, gl.FLOAT, false, byteStride, (3 + 4) * byteLength);
         }
 
         // textureCoord2
